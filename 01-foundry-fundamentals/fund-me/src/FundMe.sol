@@ -31,9 +31,7 @@ contract FundMe {
             addressToAmountFunded[funder] = 0;
         }
         funders = new address[](0);
-        (bool success, ) = payable(msg.sender).call{
-            value: address(this).balance
-        }("");
+        (bool success,) = payable(msg.sender).call{value: address(this).balance}("");
         require(success, "Failed to send ETH");
     }
 
@@ -47,6 +45,7 @@ contract FundMe {
     receive() external payable {
         fund();
     }
+
     fallback() external payable {
         fund();
     }
