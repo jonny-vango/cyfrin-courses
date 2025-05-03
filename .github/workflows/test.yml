@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+env:
+  FOUNDRY_PROFILE: ci
+
+jobs:
+  test-all-projects:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        project:
+          - 01-foundry-fundamentals/fund-me
+
+    name: Test ${{ matrix.project }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+
+      - name: Show Forge version
+        run: forge --version
+
+      - name: Run forge fmt
+        working-directory: ${{ matrix.project }}
+        run: forge fmt --check
+
+      - name: Run forge build
+        working-directory: ${{ matrix.project }}
+        run: forge build --sizes
+
+      - name: Run forge test
+        working-directory: ${{ matrix.project }}
+        run: forge test -vvv
