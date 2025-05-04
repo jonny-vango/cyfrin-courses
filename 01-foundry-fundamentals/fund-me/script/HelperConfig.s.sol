@@ -8,10 +8,9 @@ contract HelperConfigScript is Script {
     NetworkConfig public activeNetworkConfig;
 
     uint8 public constant DECIMALS = 8;
-    int256 public constant INITIAL_ANSWER = 1800e8;
-
+    int256 public constant INITIAL_PRICE = 1800e8;
     struct NetworkConfig {
-        address priceFeedAddr;
+        address priceFeed;
     }
 
     constructor() {
@@ -24,25 +23,26 @@ contract HelperConfigScript is Script {
 
     function getSepoliaConfig() public pure returns (NetworkConfig memory) {
         NetworkConfig memory sepoliaConfig = NetworkConfig({
-            priceFeedAddr: 0x694AA1769357215DE4FAC081bf1f309aDC325306
+            priceFeed: 0x694AA1769357215DE4FAC081bf1f309aDC325306
         });
         return sepoliaConfig;
     }
 
     function getAnvilConfig() public returns (NetworkConfig memory) {
-        // Use mock contract to get address on deploy
-        // Deploy mock contract programatically
+        if (activeNetworkConfig.priceFeed != address(0)) {
+            return activeNetworkConfig;
+        }
+
         vm.startBroadcast();
         MockV3Aggregator mockPriceFeed = new MockV3Aggregator(
             DECIMALS,
-            INITIAL_ANSWER
+            INITIAL_PRICE
         );
         vm.stopBroadcast();
 
         NetworkConfig memory anvilConfig = NetworkConfig({
-            priceFeedAddr: address(mockPriceFeed)
+            priceFeed: address(mockPriceFeed)
         });
-
         return anvilConfig;
     }
 }
